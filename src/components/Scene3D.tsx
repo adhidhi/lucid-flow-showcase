@@ -1,6 +1,5 @@
 import { Suspense, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sphere, Torus, Box } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface AnimatedMeshProps {
@@ -20,22 +19,22 @@ const AnimatedMesh = ({ position, color, type }: AnimatedMeshProps) => {
     }
   });
 
-  const renderMesh = () => {
+  const renderGeometry = () => {
     switch (type) {
       case 'sphere':
-        return <Sphere args={[0.8, 32, 32]} />;
+        return <sphereGeometry args={[0.8, 32, 32]} />;
       case 'torus':
-        return <Torus args={[1, 0.4, 16, 100]} />;
+        return <torusGeometry args={[1, 0.4, 16, 100]} />;
       case 'box':
-        return <Box args={[1.5, 1.5, 1.5]} />;
+        return <boxGeometry args={[1.5, 1.5, 1.5]} />;
       default:
-        return <Sphere args={[0.8, 32, 32]} />;
+        return <sphereGeometry args={[0.8, 32, 32]} />;
     }
   };
 
   return (
     <mesh ref={meshRef} position={position}>
-      {renderMesh()}
+      {renderGeometry()}
       <meshStandardMaterial
         color={color}
         emissive={color}
@@ -54,7 +53,15 @@ interface Scene3DProps {
 const Scene3D = ({ className = "" }: Scene3DProps) => {
   return (
     <div className={`w-full h-full ${className}`}>
-      <Canvas camera={{ position: [0, 0, 8], fov: 50 }}>
+      <Canvas 
+        camera={{ position: [0, 0, 8], fov: 50 }}
+        gl={{ 
+          antialias: true,
+          alpha: true,
+          preserveDrawingBuffer: false
+        }}
+        dpr={[1, 2]}
+      >
         <Suspense fallback={null}>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
@@ -74,13 +81,6 @@ const Scene3D = ({ className = "" }: Scene3DProps) => {
             position={[0, 2, 0]}
             color="#06b6d4"
             type="box"
-          />
-          
-          <OrbitControls
-            enableZoom={false}
-            enablePan={false}
-            autoRotate
-            autoRotateSpeed={1}
           />
         </Suspense>
       </Canvas>
