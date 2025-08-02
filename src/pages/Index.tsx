@@ -7,10 +7,11 @@ import AboutSection from '@/components/sections/AboutSection';
 import SkillsSection from '@/components/sections/SkillsSection';
 import ProjectsSection from '@/components/sections/ProjectsSection';
 import ContactSection from '@/components/sections/ContactSection';
+import ResumeSection from '@/components/sections/ResumeSection';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('hero');
-  const [currentParticleVariant, setCurrentParticleVariant] = useState<'hero' | 'about' | 'skills' | 'projects' | 'contact'>('hero');
+  const [currentParticleVariant, setCurrentParticleVariant] = useState<'hero' | 'about' | 'skills' | 'projects' | 'resume' | 'contact'>('hero');
 
   // Handle section scrolling
   const scrollToSection = (sectionId: string) => {
@@ -23,7 +24,7 @@ const Index = () => {
   // Update active section based on scroll position
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['hero', 'about', 'skills', 'projects', 'contact'];
+      const sections = ['hero', 'about', 'skills', 'projects', 'resume', 'contact'];
       const scrollPosition = window.scrollY + 100;
 
       for (const section of sections) {
@@ -119,6 +120,17 @@ const Index = () => {
           transition={{ duration: 0.8 }}
         >
           <ProjectsSection />
+        </motion.div>
+
+        {/* Resume Section */}
+        <motion.div
+          id="resume"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8 }}
+        >
+          <ResumeSection />
         </motion.div>
 
         {/* Contact Section */}

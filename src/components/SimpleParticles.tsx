@@ -11,7 +11,7 @@ interface Particle {
 }
 
 interface SimpleParticlesProps {
-  variant?: 'hero' | 'about' | 'skills' | 'projects' | 'contact';
+  variant?: 'hero' | 'about' | 'skills' | 'projects' | 'resume' | 'contact';
 }
 
 const SimpleParticles = ({ variant = 'hero' }: SimpleParticlesProps) => {
@@ -34,7 +34,7 @@ const SimpleParticles = ({ variant = 'hero' }: SimpleParticlesProps) => {
     const colors = ['#a855f7', '#3b82f6', '#06b6d4', '#8b5cf6', '#06b6d4'];
     
     const createParticles = () => {
-      const particleCount = variant === 'hero' ? 80 : variant === 'skills' ? 60 : 40;
+      const particleCount = variant === 'hero' ? 80 : variant === 'skills' ? 60 : variant === 'resume' ? 50 : 40;
       particlesRef.current = [];
 
       for (let i = 0; i < particleCount; i++) {
@@ -70,7 +70,7 @@ const SimpleParticles = ({ variant = 'hero' }: SimpleParticlesProps) => {
         ctx.fill();
 
         // Draw connections
-        if (variant === 'hero' || variant === 'skills') {
+        if (variant === 'hero' || variant === 'skills' || variant === 'resume') {
           particlesRef.current.forEach((otherParticle) => {
             const dx = particle.x - otherParticle.x;
             const dy = particle.y - otherParticle.y;
