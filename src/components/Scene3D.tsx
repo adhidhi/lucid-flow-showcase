@@ -1,49 +1,87 @@
 import { Suspense, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 
-interface AnimatedMeshProps {
-  position: [number, number, number];
-  color: string;
-  type: 'sphere' | 'torus' | 'box';
+interface FloatingPhotoProps {
+  imageUrl?: string;
 }
 
-const AnimatedMesh = ({ position, color, type }: AnimatedMeshProps) => {
+const FloatingPhoto = ({ imageUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face" }: FloatingPhotoProps) => {
   const meshRef = useRef<THREE.Mesh>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
+  
+  // Load the texture
+  const texture = useLoader(THREE.TextureLoader, imageUrl);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime) * 0.3;
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.5;
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.2;
+    if (meshRef.current && groupRef.current) {
+      // Gentle floating animation
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.3;
+      
+      // Slow rotation
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
+      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
     }
   });
 
-  const renderGeometry = () => {
-    switch (type) {
-      case 'sphere':
-        return <sphereGeometry args={[0.8, 32, 32]} />;
-      case 'torus':
-        return <torusGeometry args={[1, 0.4, 16, 100]} />;
-      case 'box':
-        return <boxGeometry args={[1.5, 1.5, 1.5]} />;
-      default:
-        return <sphereGeometry args={[0.8, 32, 32]} />;
-    }
-  };
-
   return (
-    <mesh ref={meshRef} position={position}>
-      {renderGeometry()}
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={0.2}
-        roughness={0.1}
-        metalness={0.8}
-      />
-    </mesh>
+    <group ref={groupRef}>
+      <mesh ref={meshRef} position={[0, 0, 0]}>
+        <planeGeometry args={[3, 3]} />
+        <meshStandardMaterial
+          map={texture}
+          transparent
+          side={THREE.DoubleSide}
+          roughness={0.1}
+          metalness={0.2}
+        />
+      </mesh>
+      
+      {/* Glowing ring around photo */}
+      <mesh position={[0, 0, -0.1]}>
+        <ringGeometry args={[2.2, 2.5, 32]} />
+        <meshStandardMaterial
+          color="#a855f7"
+          emissive="#a855f7"
+          emissiveIntensity={0.3}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+    </group>
   );
+};
+
+const ParticleField = () => {
+  const groupRef = useRef<THREE.Group>(null!);
+  const particlesCount = 50;
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+    }
+  });
+
+  const particles = Array.from({ length: particlesCount }, (_, i) => {
+    const angle = (i / particlesCount) * Math.PI * 2;
+    const radius = 5 + Math.random() * 3;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const y = (Math.random() - 0.5) * 6;
+    
+    return (
+      <mesh key={i} position={[x, y, z]}>
+        <sphereGeometry args={[0.02, 8, 8]} />
+        <meshStandardMaterial
+          color="#3b82f6"
+          emissive="#3b82f6"
+          emissiveIntensity={0.5}
+        />
+      </mesh>
+    );
+  });
+
+  return <group ref={groupRef}>{particles}</group>;
 };
 
 interface Scene3DProps {
@@ -67,21 +105,8 @@ const Scene3D = ({ className = "" }: Scene3DProps) => {
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
           <pointLight position={[-10, -10, -10]} />
           
-          <AnimatedMesh
-            position={[-2, 0, 0]}
-            color="#a855f7"
-            type="sphere"
-          />
-          <AnimatedMesh
-            position={[2, 0, 0]}
-            color="#3b82f6"
-            type="torus"
-          />
-          <AnimatedMesh
-            position={[0, 2, 0]}
-            color="#06b6d4"
-            type="box"
-          />
+          <FloatingPhoto />
+          <ParticleField />
         </Suspense>
       </Canvas>
     </div>
